@@ -35,3 +35,6 @@ surrealix_demo-*.tar
 npm-debug.log
 /assets/node_modules/
 
+
+# Data
+data/
