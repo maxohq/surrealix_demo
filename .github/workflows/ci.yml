@@ -1,0 +1,120 @@
+name: CI
+'on':
+  push: {}
+  pull_request: {}
+jobs:
+  mix-format:
+    name: Mix Format
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+      ELIXIR_ENV: test
+      DATABASE_HOST: localhost
+      DATABASE_USER: postgres
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache deps
+        id: cache-deps
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-elixir-deps
+        with:
+          path: deps
+          key: >-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-${{
+            hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-
+      - name: Cache compiled build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-compiled-build
+        with:
+          path: _build
+          key: >-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-${{
+            hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-
+            ${{ runner.os }}-mix
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: 1.16.0
+          otp-version: 26.1.2
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Setup .env file
+        run: bin/ci-setup.sh
+      - name: Run format check
+        run: mix format --check-formatted
+      - name: Compile Elixir code
+        run: mix compile
+  mix-test:
+    name: Mix Test
+    runs-on: ubuntu-latest
+    needs: mix-format
+    env:
+      MIX_ENV: test
+      ELIXIR_ENV: test
+      DATABASE_HOST: localhost
+      DATABASE_USER: postgres
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: postgres
+    services:
+      postgres:
+        image: postgres:15.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - '5432:5432'
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache deps
+        id: cache-deps
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-elixir-deps
+        with:
+          path: deps
+          key: >-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-${{
+            hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-
+      - name: Cache compiled build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-compiled-build
+        with:
+          path: _build
+          key: >-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-${{
+            hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ env.cache-name }}-
+            ${{ runner.os }}-mix-${{ env.MIX_ENV }}-
+            ${{ runner.os }}-mix
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: 1.16.0
+          otp-version: 26.1.2
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Setup .env file
+        run: bin/ci-setup.sh
+      - name: Start SurrealDB docker image
+        run: bin/ci-docker-surreal-restart.sh
+      - name: Run Elixir tests
+        run: mix test
+      - name: Stop SurrealDB docker image
+        run: bin/ci-docker-surreal-stop.sh
