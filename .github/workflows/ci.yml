@@ -48,8 +48,6 @@ jobs:
           otp-version: 26.1.2
       - name: Install dependencies
         run: mix deps.get
-      - name: Setup .env file
-        run: bin/ci-setup.sh
       - name: Run format check
         run: mix format --check-formatted
       - name: Compile Elixir code
@@ -110,8 +108,6 @@ jobs:
           otp-version: 26.1.2
       - name: Install dependencies
         run: mix deps.get
-      - name: Setup .env file
-        run: bin/ci-setup.sh
       - name: Start SurrealDB docker image
         run: bin/ci-docker-surreal-restart.sh
       - name: Run Elixir tests
