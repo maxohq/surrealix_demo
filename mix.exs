@@ -52,6 +52,9 @@ defmodule SurrealixDemo.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
 
+      # Misc
+      {:dotenv_parser, "~> 2.0"},
+
       ## DB - SurrealDB
       {:surrealix, "~> 0.1"},
       {:token_operator, "~> 0.3.1"}

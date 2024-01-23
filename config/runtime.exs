@@ -20,6 +20,17 @@ if System.get_env("PHX_SERVER") do
   config :surrealix_demo, SurrealixDemoWeb.Endpoint, server: true
 end
 
+dot_env_path = Path.expand(Path.join(__DIR__, "../.env"))
+
+if config_env() == :dev do
+  DotenvParser.load_file(dot_env_path)
+  config :logger, level: :debug
+end
+
+if config_env() == :test do
+  DotenvParser.load_file(dot_env_path)
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

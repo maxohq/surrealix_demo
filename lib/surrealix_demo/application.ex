@@ -16,6 +16,12 @@ defmodule SurrealixDemo.Application do
       {Finch, name: SurrealixDemo.Finch},
       # Start a worker by calling: SurrealixDemo.Worker.start_link(arg)
       # {SurrealixDemo.Worker, arg},
+
+      ## For SurrealDB
+      {Surreal.ClientSupervisor, []},
+      {Surreal.ConnSupervisor, []},
+      %{id: Surreal.Repo, start: {Surreal.Repo, :start_link, [[]]}},
+
       # Start to serve requests, typically the last entry
       SurrealixDemoWeb.Endpoint
     ]
