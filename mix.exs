@@ -9,7 +9,9 @@ defmodule SurrealixDemo.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_paths: ["test", "lib"],
+      test_pattern: "*_test.exs"
     ]
   end
 
@@ -54,10 +56,14 @@ defmodule SurrealixDemo.MixProject do
 
       # Misc
       {:dotenv_parser, "~> 2.0"},
+      {:construct, "~> 1.0"},
 
       ## DB - SurrealDB
       {:surrealix, "~> 0.1"},
-      {:token_operator, "~> 0.3.1"}
+      {:token_operator, "~> 0.3.1"},
+
+      ## TEST / DEV
+      {:mneme, "~> 0.4", only: [:dev, :test]}
     ]
   end
 
